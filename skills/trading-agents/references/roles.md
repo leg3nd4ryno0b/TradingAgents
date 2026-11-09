@@ -126,7 +126,9 @@ debate.
 **Salida:**
 - **Recomendación**: una de Buy / Overweight / Hold / Underweight / Sell
 - **Fundamento**: qué argumentos decidieron
-- **Acciones estratégicas**: pasos concretos, dimensionados contra una asignación estándar
+- **Acciones estratégicas**: pasos concretos, dimensionados contra las reglas de
+  tamaño de SKILL.md (máx. 5 % por activo, riesgo ≤ 1 % por operación, salvo que
+  el usuario dé las suyas) y contra la posición que ya tenga
 
 ## 8. Trader
 

@@ -26,6 +26,7 @@ Toma del pedido del usuario (o usa el valor por defecto sin preguntar):
 | Rondas de debate de riesgo | 1 (cada uno de los 3 habla una vez) |
 | Idioma | el del usuario |
 | Contexto de cartera | si el usuario dice que ya tiene posición, tamaño o tolerancia al riesgo, pásalo al Trader y al Portfolio Manager |
+| Reglas de tamaño | si el usuario no da las suyas: posición máxima 5 % de la cartera por activo, y riesgo por operación ≤ 1 % de la cartera (acciones × distancia al stop). Decláralas como supuesto en el informe |
 
 ## Paso 1 — Datos reales
 
@@ -40,12 +41,24 @@ fuente usaste:
    Instala `yfinance` y `pandas` solo si faltan. Si termina con
    `SIN_ACCESO_YAHOO`, la red no permite Yahoo: pasa a la opción 2.
 2. **Conector de bróker** si está disponible (p. ej. Interactive Brokers:
-   `get_price_snapshot`, `get_price_history`, `get_earnings_insight`). Con el
-   historial de precios, calcula los indicadores importando `compute_indicators`
-   del script (recibe un DataFrame con columnas `Open, High, Low, Close, Volume`).
+   `get_price_history` diario, `get_price_snapshot`, `get_earnings_insight`).
+   Pide ~300 barras diarias (bastan para la SMA200 y es menos texto que copiar),
+   guarda la respuesta del historial **tal cual** en un archivo JSON y pásalo al
+   mismo script, que calcula las secciones 1–3 sin contactar Yahoo:
+   ```bash
+   python <ruta-de-la-skill>/scripts/fetch_data.py TICKER --prices barras.json --date YYYY-MM-DD --out datos_TICKER.md
+   ```
+   Acepta el formato en columnas del conector (`{"time": [...], "open": [...]}`),
+   una lista de filas o CSV. Si el snapshot en vivo difiere de la última barra
+   (sesión abierta), cita ambos con su hora.
 3. **Búsqueda web**: precio actual, máx/mín 52 semanas, ratios, últimos
    resultados trimestrales, noticias de la semana. Cita la fuente y la fecha de
    cada número.
+
+Con las opciones 2 o 3, las secciones 4–9 del archivo de datos quedan como
+encabezados por completar: escribe ahí lo que encuentres en la web o el
+conector (fuente y fecha en cada dato), o «no disponible». Así cada analista
+sigue leyendo sus secciones de un solo archivo, sea cual sea la fuente.
 4. Si nada funciona, pide al usuario que pegue los datos o un CSV. No sigas con
    números inventados: un informe con niveles de precio inventados es peor que
    ninguno, porque parece accionable.
@@ -96,7 +109,9 @@ Guarda todo en `informe_TICKER_YYYY-MM-DD.md` con esta estructura:
 
 ```markdown
 # TradingAgents — TICKER — YYYY-MM-DD
-**Rating final: <Buy|Overweight|Hold|Underweight|Sell>** · Entrada: X · Stop: Y · Fuente de datos: ...
+**Rating final: <Buy|Overweight|Hold|Underweight|Sell>** · Entrada: X · Stop: Y · Tamaño: Z · Fuente de datos: ...
+<!-- Con Hold: "Entrada: — (mantener)" o una entrada condicional con su condición; el stop aplica a la posición existente si la hay. -->
+<!-- Con Sell/Underweight: nivel o plan de salida en lugar de la entrada. -->
 
 ## I. Informes de analistas
 ### Mercado (técnico) / ### Sentimiento / ### Noticias / ### Fundamentales
