@@ -83,6 +83,13 @@ def load_prices(path: str) -> pd.DataFrame:
             inner = [v for v in data.values() if isinstance(v, (list, dict))]
             if len(inner) == 1:  # {"bars": [...]} / {"data": {...}}
                 data = inner[0]
+        # A saved tool result: [{"type": "text", "text": "<json>"}]
+        if isinstance(data, list) and data and isinstance(data[0], dict) and set(data[0]) <= {"type", "text"}:
+            data = json.loads("".join(d.get("text", "") for d in data))
+        if isinstance(data, dict) and not any(k.lower() in _TIME_KEYS for k in data):
+            inner = [v for v in data.values() if isinstance(v, (list, dict))]
+            if len(inner) == 1:
+                data = inner[0]
         df = pd.DataFrame(data)
     df.columns = [str(c).strip().lower() for c in df.columns]
     tkey = next((k for k in _TIME_KEYS if k in df.columns), None)
@@ -212,6 +219,10 @@ def build_report(ticker: str, trade_date: date, hist: pd.DataFrame | None = None
             ("Apertura / Máx / Mín", f"{_fmt(r['Open'])} / {_fmt(r['High'])} / {_fmt(r['Low'])}"),
             ("Volumen", _fmt(r["Volume"], 0)),
             ("Máx / Mín 52 semanas", f"{_fmt(hi52)} / {_fmt(lo52)}"),
+            ("ATR % del precio", _fmt(i["atr"] / r["Close"] * 100)),
+            ("Peor caída diaria (1 año) %", _fmt(hist["Close"].pct_change().iloc[-252:].min() * 100)),
+            ("Peor hueco de apertura (1 año) %",
+             _fmt((hist["Open"] / hist["Close"].shift() - 1).iloc[-252:].min() * 100)),
             ("Rend. 1M / 3M / 6M %", " / ".join(
                 _fmt((r["Close"] / hist["Close"].iloc[-n] - 1) * 100) if len(hist) > n else "n/d"
                 for n in (21, 63, 126))),

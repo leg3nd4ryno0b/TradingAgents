@@ -21,12 +21,13 @@ Toma del pedido del usuario (o usa el valor por defecto sin preguntar):
 |---|---|
 | Ticker (formato Yahoo: `NVDA`, `SPY`, `BTC-USD`, `GGAL.BA`) | obligatorio; si es ambiguo, pregunta |
 | Fecha de análisis | hoy |
+| Horizonte | sin fecha fija (posición de semanas a meses). Si el usuario da una fecha de salida, todos los roles juzgan *ese* plazo: una buena empresa puede ser una mala operación de una semana |
 | Analistas | los 4 |
 | Rondas de debate de inversión | 1 (alcista y bajista hablan una vez cada uno) |
 | Rondas de debate de riesgo | 1 (cada uno de los 3 habla una vez) |
 | Idioma | el del usuario |
-| Contexto de cartera | si el usuario dice que ya tiene posición, tamaño o tolerancia al riesgo, pásalo al Trader y al Portfolio Manager |
-| Reglas de tamaño | si el usuario no da las suyas: posición máxima 5 % de la cartera por activo, y riesgo por operación ≤ 1 % de la cartera (acciones × distancia al stop). Decláralas como supuesto en el informe |
+| Contexto de cartera | posiciones, caja, tolerancia al riesgo. Si hay un conector de bróker con lectura de cuenta y el usuario pide usar "su cartera", léela; si no, usa lo que diga. Pásalo al Trader y al Portfolio Manager |
+| Reglas de tamaño | posición máxima 5 % de la cartera por activo, y riesgo por operación ≤ 1 % de la cartera. Un monto máximo del usuario ("hasta 100 $") reemplaza solo el tope de posición; la regla del 1 % sigue salvo que el usuario la cambie. Declara en el informe qué reglas usaste |
 
 ## Paso 1 — Datos reales
 
@@ -39,33 +40,42 @@ fuente usaste:
    python <ruta-de-la-skill>/scripts/fetch_data.py TICKER --date YYYY-MM-DD --out datos_TICKER.md
    ```
    Instala `yfinance` y `pandas` solo si faltan. Si termina con
-   `SIN_ACCESO_YAHOO`, la red no permite Yahoo: pasa a la opción 2.
+   `SIN_ACCESO_YAHOO` (o ya sabes que Yahoo está bloqueado en este entorno),
+   pasa a la opción 2.
 2. **Conector de bróker** si está disponible (p. ej. Interactive Brokers:
-   `get_price_history` diario, `get_price_snapshot`, `get_earnings_insight`).
-   Pide ~300 barras diarias (bastan para la SMA200 y es menos texto que copiar),
-   guarda la respuesta del historial **tal cual** en un archivo JSON y pásalo al
-   mismo script, que calcula las secciones 1–3 sin contactar Yahoo:
+   `get_price_history` diario, `get_price_snapshot`). Pide **~260 barras
+   diarias**: bastan para la SMA200 y su arranque, y cada barra extra es texto
+   que hay que copiar. Si el resultado del conector quedó guardado en un
+   archivo, pasa esa ruta directamente; si no, escribe la respuesta tal cual en
+   `barras.json`. Luego:
    ```bash
    python <ruta-de-la-skill>/scripts/fetch_data.py TICKER --prices barras.json --date YYYY-MM-DD --out datos_TICKER.md
    ```
    Acepta el formato en columnas del conector (`{"time": [...], "open": [...]}`),
-   una lista de filas o CSV. Si el snapshot en vivo difiere de la última barra
-   (sesión abierta), cita ambos con su hora.
+   una lista de filas, CSV, o el archivo de resultado de la herramienta con el
+   JSON dentro de un bloque de texto. Lo que traiga el snapshot y no esté en el
+   archivo (último precio en vivo con su hora, after-hours, volatilidad
+   implícita, máx/mín 13 y 26 semanas) añádelo como sección «1b».
 3. **Búsqueda web**: precio actual, máx/mín 52 semanas, ratios, últimos
    resultados trimestrales, noticias de la semana. Cita la fuente y la fecha de
    cada número.
+4. Si nada funciona, pide al usuario que pegue los datos o un CSV. No sigas con
+   números inventados: un informe con niveles de precio inventados es peor que
+   ninguno, porque parece accionable.
 
 Con las opciones 2 o 3, las secciones 4–9 del archivo de datos quedan como
 encabezados por completar: escribe ahí lo que encuentres en la web o el
 conector (fuente y fecha en cada dato), o «no disponible». Así cada analista
 sigue leyendo sus secciones de un solo archivo, sea cual sea la fuente.
-4. Si nada funciona, pide al usuario que pegue los datos o un CSV. No sigas con
-   números inventados: un informe con niveles de precio inventados es peor que
-   ninguno, porque parece accionable.
 
-Además, para los analistas de **noticias y sentimiento**, haz búsquedas web de la
+Para los analistas de **noticias y sentimiento**, haz búsquedas web de la
 última semana (empresa, sector, macro, y sentimiento en redes) si hay búsqueda
 disponible. El script solo trae titulares de Yahoo.
+
+Busca también el **calendario dentro del horizonte**: resultados de la empresa y
+de pares que muevan el sector, splits, dividendos, cambios de índice,
+vencimientos de opciones relevantes, Fed/CPI/empleo. Un evento el día de salida
+cambia la operación entera.
 
 Si la fecha de análisis es pasada (backtest), descarta cualquier dato posterior
 a ella: el original lo hace para no hacer trampa con información del futuro.
@@ -89,7 +99,10 @@ recomendación de 5 niveles.
 
 El **Trader** (rol 8) convierte el plan en una propuesta: Buy / Hold / Sell,
 entrada y stop como precios absolutos sacados del snapshot y el ATR, y tamaño
-de posición.
+de posición. El riesgo de la regla del 1 % es acciones × distancia al stop,
+pero si el ATR supera ~5 % del precio o hubo huecos grandes recientes, calcula
+también la pérdida con un hueco como el peor del último año y dimensiona con
+la cifra mayor: un stop no protege de una apertura por debajo de él.
 
 ## Paso 5 — Debate de riesgo
 

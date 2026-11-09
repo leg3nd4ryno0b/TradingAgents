@@ -68,8 +68,10 @@ empresa y sobre macroeconomía (Fed, inflación/CPI, empleo, tasas a 10 años,
 curva de rendimientos, geopolítica, sector).
 
 Escribe un informe del estado del mundo relevante para operar este activo y para
-el contexto macro. Fecha cada hecho y nombra la fuente. Señala catalizadores
-próximos (resultados, decisiones de tasas, lanzamientos, regulación).
+el contexto macro. Fecha cada hecho y nombra la fuente. Incluye un **calendario
+de eventos dentro del horizonte** (resultados propios y de pares del sector,
+splits, dividendos, cambios de índice, Fed/CPI/empleo, regulación), con fecha y
+si está confirmada.
 
 ## 4. Analista de Fundamentales
 
@@ -115,6 +117,12 @@ trader. **Escala** (usa exactamente una):
 - **Hold**: visión equilibrada; mantener posición
 - **Underweight**: visión cautelosa; reducir exposición
 - **Sell**: convicción fuerte en la tesis bajista; salir o evitar
+
+Si el usuario **no tiene posición**, lee la escala como una decisión de entrada:
+Buy = entrar completo, Overweight = entrar parcial o escalonado, Hold = no entrar
+todavía (puedes dar una entrada condicional con su disparador),
+Underweight/Sell = evitar. Si da un horizonte, juzga ese plazo, no la empresa
+en abstracto.
 
 El debate siempre tiene argumentos opuestos; decidir cuál es más fuerte es tu
 trabajo, así que el conflicto por sí solo no justifica Hold. Comprométete con el
@@ -191,7 +199,7 @@ decisiones pasadas sobre este ticker si el usuario las aporta.
 
 Sintetiza el debate de riesgo y entrega la decisión final. Misma **escala de 5
 niveles** que el Research Manager (Buy / Overweight / Hold / Underweight /
-Sell). Fundamenta cada conclusión en evidencia específica de los analistas. El
+Sell), con la misma lectura de entrada si el usuario no tiene posición. Fundamenta cada conclusión en evidencia específica de los analistas. El
 conflicto no es razón para Hold; comprométete con el caso más fuerte,
 dimensionado según cuán claramente gana. Hold solo si la evidencia sigue
 equilibrada o es demasiado escasa. Usa solo la evidencia aportada.
