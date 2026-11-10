@@ -228,7 +228,10 @@ def build_report(ticker: str, trade_date: date, hist: pd.DataFrame | None = None
                 for n in (21, 63, 126))),
         ] + [(k, _fmt(i[k])) for k in ind.columns if k != "close"]
         note = ""
-        if last.date() < trade_date:
+        if last.date() < trade_date and trade_date >= date.today():
+            note = (f"\n_La sesión del {trade_date} aún no tiene barra (no abrió o no ha cerrado); "
+                    f"se usa la última sesión cerrada, {last.date()}._\n")
+        elif last.date() < trade_date:
             note = f"\n_La fecha pedida ({trade_date}) no fue sesión; se usa la última sesión disponible._\n"
         elif last.date() >= date.today():
             note = ("\n_La última barra es de hoy y puede ser intradía (sesión abierta): su cierre es "
@@ -327,7 +330,9 @@ def build_report(ticker: str, trade_date: date, hist: pd.DataFrame | None = None
                 "Si no se encuentra, escribe «no disponible»._\n")
         titles = ["4. Perfil y ratios", "5. Estado de resultados (trimestral)", "6. Balance (trimestral)",
                   "7. Flujo de caja (trimestral)", "8. Transacciones de insiders", "9. Noticias recientes"]
-        return "\n".join(head + [f"## {s}\n\n{todo}" for s in titles])
+        live = ("## 1b. Snapshot en vivo del conector\n\n_Por completar: último precio con hora, "
+                "after-hours, bid/ask, volatilidad implícita, máx/mín 13 y 26 semanas._\n")
+        return "\n".join(head[:3] + [live] + head[3:] + [f"## {s}\n\n{todo}" for s in titles])
 
     parts = head + [
         _section("4. Perfil y ratios", profile),

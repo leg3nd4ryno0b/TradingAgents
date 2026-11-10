@@ -27,7 +27,7 @@ Toma del pedido del usuario (o usa el valor por defecto sin preguntar):
 | Rondas de debate de riesgo | 1 (cada uno de los 3 habla una vez) |
 | Idioma | el del usuario |
 | Contexto de cartera | posiciones, caja, tolerancia al riesgo. Si hay un conector de bróker con lectura de cuenta y el usuario pide usar "su cartera", léela; si no, usa lo que diga. Pásalo al Trader y al Portfolio Manager |
-| Reglas de tamaño | posición máxima 5 % de la cartera por activo, y riesgo por operación ≤ 1 % de la cartera. Un monto máximo del usuario ("hasta 100 $") reemplaza solo el tope de posición; la regla del 1 % sigue salvo que el usuario la cambie. Declara en el informe qué reglas usaste |
+| Reglas de tamaño | posición máxima 5 % de la cartera por activo, y riesgo por operación ≤ 1 % de la cartera. Un monto máximo del usuario ("hasta 100 $") reemplaza solo el tope de posición; la regla del 1 % sigue salvo que el usuario la cambie, calculada sobre la cartera actual (antes de depositar). Declara en el informe qué reglas usaste |
 
 ## Paso 1 — Datos reales
 
@@ -74,7 +74,9 @@ disponible. El script solo trae titulares de Yahoo.
 
 Busca también el **calendario dentro del horizonte**: resultados de la empresa y
 de pares que muevan el sector, splits, dividendos, cambios de índice,
-vencimientos de opciones relevantes, Fed/CPI/empleo. Un evento el día de salida
+vencimientos de opciones relevantes, Fed/CPI/empleo. **Confirma en la fuente
+oficial** (relación con inversores de la empresa, BLS, Fed) toda fecha que
+mueva la entrada o la salida; si solo hay fechas proyectadas, dilo. Un evento el día de salida
 cambia la operación entera.
 
 Si la fecha de análisis es pasada (backtest), descarta cualquier dato posterior
@@ -102,7 +104,14 @@ entrada y stop como precios absolutos sacados del snapshot y el ATR, y tamaño
 de posición. El riesgo de la regla del 1 % es acciones × distancia al stop,
 pero si el ATR supera ~5 % del precio o hubo huecos grandes recientes, calcula
 también la pérdida con un hueco como el peor del último año y dimensiona con
-la cifra mayor: un stop no protege de una apertura por debajo de él.
+la cifra mayor: un stop no protege de una apertura por debajo de él. Usa el
+«peor hueco de apertura» del snapshot; si ese hueco vino de un evento (p. ej.
+resultados) y no hay uno comparable dentro del horizonte, puedes usar el peor
+hueco sin evento, mostrando las dos cifras.
+
+En montos pequeños, suma los **costos**: comisión de compra y venta del bróker,
+y el costo de transferir el dinero si lo hay. En una operación de 100 $ a una
+semana, 2 $ de comisiones son la mitad del movimiento esperado.
 
 ## Paso 5 — Debate de riesgo
 
@@ -115,6 +124,15 @@ El **Portfolio Manager** (rol 12) decide el rating final. Si en la carpeta de
 trabajo hay un informe anterior de este mismo ticker (`informe_TICKER_*.md`),
 compáralo con el precio actual y pásale al PM la lección (¿la decisión
 anterior acertó?). Así emula la memoria del original.
+
+## Varios tickers a la vez
+
+Si el usuario analiza varios activos en el mismo pedido o en pedidos seguidos
+(o ya tiene posiciones del mismo sector), cada informe debe decir cómo encaja
+con los demás: la regla del 1 % y el estrés de hueco se aplican también al
+**grupo correlacionado** (p. ej. MU + SNDK, ambas memoria: un solo tope para
+las dos), y la exposición total al sector va en el resumen. Si hay subagentes
+disponibles, un análisis por ticker en paralelo funciona bien.
 
 ## Paso 7 — Entrega
 

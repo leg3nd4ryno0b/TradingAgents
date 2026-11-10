@@ -58,7 +58,7 @@ contrarian; r/stocks más mesurado; r/investing de más largo plazo).
 Produce un informe de sentimiento de la última semana: tono institucional
 (titulares) vs. minorista (redes), cambios de tono, temas dominantes, y si el
 sentimiento parece adelantado o atrasado respecto del precio. Distingue
-claramente lo que viene de cada fuente. Si no hay datos de redes, dilo y basa el
+claramente lo que viene de cada fuente. Si no puedes leer las redes directamente, usa agregadores de sentimiento citándolos, o dilo y basa el
 informe solo en titulares.
 
 ## 3. Analista de Noticias
@@ -121,8 +121,10 @@ trader. **Escala** (usa exactamente una):
 Si el usuario **no tiene posición**, lee la escala como una decisión de entrada:
 Buy = entrar completo, Overweight = entrar parcial o escalonado, Hold = no entrar
 todavía (puedes dar una entrada condicional con su disparador),
-Underweight/Sell = evitar. Si da un horizonte, juzga ese plazo, no la empresa
-en abstracto.
+Underweight/Sell = evitar. Hold significa «sin ventaja clara ahora, esperar
+una señal»; Underweight/Sell significa «la expectativa es negativa en este
+plazo (contando costos), mejor no tocarla». Si da un horizonte, juzga ese plazo,
+no la empresa en abstracto.
 
 El debate siempre tiene argumentos opuestos; decidir cuál es más fuerte es tu
 trabajo, así que el conflicto por sí solo no justifica Hold. Comprométete con el
